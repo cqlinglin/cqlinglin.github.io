@@ -80,7 +80,8 @@
 | 加载撒彩纸 | `main.js` → `celebrate()` | 里面两组 `for` 循环的数字是张数（110 / 80）；不想要就删掉 `setTimeout(celebrate, 380);` |
 | 点击撒彩纸 | `main.js` → `burst()` | `58` 是主爆点张数，`24` 是小碎片；半径和速度看 `addPiece(..., 15, 1)` 里的 `15` |
 | Logo 后变色光晕 | `style.css` → `.image-bg` | `hueSpin 16s` 是转一圈的时间，`inset: -70%` 是光圈大小，`opacity: 0.6` 是强度 |
-| 主题圆形揭幕 | `main.js` → `switchTheme()` | `DUR = 520` 扩散时长，`FADE = 240` 淡出时长 |
+| 主题切换光波 | `main.js` → `switchTheme()` | `620ms` 是光波扩散时长；不想要就删掉 `switchTheme` 里 `wave` 那一段 |
+| 副标题打字 | `main.js` → 逐字输入 | `58 + Math.random() * 45` 是每个字的间隔（毫秒），文字改 `data-text` |
 
 星星密度在 `main.js` 的 `Math.floor((W * H) / 6800)`，数字越大星星越少。
 系统开启「减少动态效果」时，这些动画会自动关闭。
@@ -88,7 +89,7 @@
 ### 5. 明暗开关
 
 顶栏那个胶囊开关是 `#themeToggle`（宽 40、高 22，滑块里放着太阳和月亮）。
-点一下会从开关的位置扩散出一个圆，盖住旧页面后切换到新主题。
+点一下，整页颜色做 0.25s 过渡，同时从开关位置扩散出一圈柔光；光波是半透明的，不会盖住内容。
 选择存在浏览器 `localStorage` 的 `vyra-theme` 键里；默认深色，
 在网址后加 `?theme=light` 可以临时预览浅色（不写入存储）。
 
@@ -126,3 +127,4 @@ git push
 - 不加载任何外部字体、图标库或统计脚本，离线也能正常显示。
 - 图标是 emoji + 内联 SVG，可以直接替换。
 - 页面结构：`header.nav` → `section.hero` → `section.features` → `footer`。
+- 副标题在 `<p class="tagline" data-text="...">` 里，页面加载后逐字打出来。

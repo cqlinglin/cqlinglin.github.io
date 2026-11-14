@@ -28,69 +28,49 @@
     } catch (e) {}
   }
 
-  var veil = document.getElementById('themeVeil');
-  var switching = false;
+  var wave = document.getElementById('themeWave');
 
   if (switches.length) {
     applyTheme(root.dataset.theme || 'dark');
 
-    // 从开关位置扩散的圆形遮罩：先盖住旧页面，再切换主题并淡出
+    // 主题切换：颜色做 0.25s 过渡，同时从开关位置扩散一圈柔光（不遮内容）
     function switchTheme(fromEl) {
-      if (switching) return;
       var next = root.dataset.theme === 'light' ? 'dark' : 'light';
 
-      if (!veil || !fromEl || reduceMotion) {
-        applyTheme(next);
-        return;
-      }
+      root.classList.add('theme-changing');
+      clearTimeout(switchTheme._c);
+      switchTheme._c = setTimeout(function () {
+        root.classList.remove('theme-changing');
+      }, 320);
 
-      switching = true;
+      applyTheme(next);
+
+      if (!wave || !fromEl || reduceMotion) return;
+
       var rect = fromEl.getBoundingClientRect();
       var cx = rect.left + rect.width / 2;
       var cy = rect.top + rect.height / 2;
-      var radius = Math.hypot(
+      var maxR = Math.hypot(
         Math.max(cx, window.innerWidth - cx),
         Math.max(cy, window.innerHeight - cy)
       );
-      var DUR = 520;
-      var FADE = 240;
-      var t0 = 0;
 
-      veil.hidden = false;
-      veil.style.background = next === 'light' ? '#ffffff' : '#0d1411';
-      veil.style.opacity = '1';
-      veil.style.clipPath = 'circle(0px at ' + cx + 'px ' + cy + 'px)';
+      wave.style.setProperty('--wx', cx + 'px');
+      wave.style.setProperty('--wy', cy + 'px');
+      wave.style.setProperty('--ws', String((maxR * 2) / 10));
+      wave.style.background =
+        next === 'light'
+          ? 'radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 45%, rgba(255,255,255,0) 70%)'
+          : 'radial-gradient(circle, rgba(10,16,13,0.6) 0%, rgba(10,16,13,0.2) 45%, rgba(10,16,13,0) 70%)';
 
-      function expand(now) {
-        if (!t0) t0 = now;
-        var p = Math.min(1, (now - t0) / DUR);
-        var eased = 1 - Math.pow(1 - p, 3);
-        veil.style.clipPath =
-          'circle(' + (radius * eased).toFixed(1) + 'px at ' + cx + 'px ' + cy + 'px)';
-        if (p < 1) {
-          requestAnimationFrame(expand);
-        } else {
-          applyTheme(next);
-          requestAnimationFrame(fade);
-        }
-      }
-
-      function fade(now) {
-        var f0 = now;
-        (function step(n) {
-          var p = Math.min(1, (n - f0) / FADE);
-          veil.style.opacity = String(1 - p);
-          if (p < 1) {
-            requestAnimationFrame(step);
-          } else {
-            veil.hidden = true;
-            veil.style.cssText = '';
-            switching = false;
-          }
-        })(now);
-      }
-
-      requestAnimationFrame(expand);
+      wave.hidden = false;
+      wave.style.animation = 'none';
+      void wave.offsetWidth;
+      wave.style.animation = '';
+      clearTimeout(switchTheme._t);
+      switchTheme._t = setTimeout(function () {
+        wave.hidden = true;
+      }, 700);
     }
 
     switches.forEach(function (el) {
@@ -575,7 +555,21 @@
     });
   }
 
-  /* ---------- 8. 年份 ---------- */
+  /* ---------- 8. 副标题逐字输入 ---------- */
+  var typeEl = document.getElementById('typeText');
+  var taglineEl = typeEl ? typeEl.closest('.tagline') : null;
+
+  if (typeEl && taglineEl && !reduceMotion) {
+    var fullText = Array.from(taglineEl.dataset.text || typeEl.textContent);
+    var ti = 0;
+    typeEl.textContent = '';
+    setTimeout(function typeStep() {
+      typeEl.textContent += fullText[ti++];
+      if (ti < fullText.length) setTimeout(typeStep, 58 + Math.random() * 45);
+    }, 420);
+  }
+
+  /* ---------- 9. 年份 ---------- */
   var year = document.getElementById('year');
   if (year) year.textContent = String(new Date().getFullYear());
 })();

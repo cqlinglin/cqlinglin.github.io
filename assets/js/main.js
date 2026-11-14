@@ -437,10 +437,10 @@
   var index = [];
 
   function buildIndex() {
-    index = [
+    /* index = [
       { title: '首页', desc: '回到页面顶部', href: '#top' },
       { title: '快速开始', desc: '八张卡片，八件小事', href: '#features' }
-    ];
+    ]; */
 
     document.querySelectorAll('.box').forEach(function (box) {
       var h2 = box.querySelector('.title');

@@ -42,20 +42,27 @@
 - 副标题：`<p class="tagline">`。
 - 两个按钮：`.actions` 里的两个 `<a class="btn ...">`，`brand` 是绿色实心，`alt` 是灰色。
 
-### 2. 改卡片
+### 2. 改卡片（整张卡片可点击跳转）
 
-每张卡片是一个 `.item`，复制一整段就能新增一张（四列时每行四张）：
+每张卡片本身就是一个链接，`href` 写跳转地址，整块区域都能点：
 
 ```html
 <div class="item">
-  <article class="box">
+  <a class="box" href="https://example.com">
     <div class="icon">⚙️</div>          <!-- 直接用 emoji，也可以换成 <svg> -->
     <h2 class="title">卡片标题</h2>
     <p class="details">卡片说明文字。</p>
-  </article>
+  </a>
 </div>
 ```
 
+- 站内新页面：`href="./posts/first.html"`（把 html 文件一起放进仓库就行）
+- 站内锚点：`href="#features"`
+- 外站链接：`href="https://github.com/cqlinglin"`，要新标签打开就加 `target="_blank" rel="noopener"`
+- 暂时不跳转：保持 `href="#"`
+- 复制整个 `<div class="item">` 就能新增一张
+
+鼠标移上去时边框变绿、右上角出现 ↗ 箭头；键盘 Tab 也能聚焦，回车跳转。
 卡片的搜索关键词来自标题和说明，改了文字搜索会跟着变，不用另外维护。
 
 ### 3. 改配色

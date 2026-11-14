@@ -796,6 +796,7 @@ svg {
 }
 
 .box {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -803,12 +804,57 @@ svg {
   border: 1px solid var(--bg-soft);
   border-radius: 12px;
   background: var(--bg-soft);
-  transition: border-color 0.25s, background-color 0.25s, transform 0.25s var(--ease);
+  cursor: pointer;
+  transition: border-color 0.25s, background-color 0.25s, transform 0.25s var(--ease),
+    box-shadow 0.25s;
 }
 
-.box:hover {
+.box:hover,
+.box:focus-visible {
   border-color: var(--brand-1);
   transform: translateY(-2px);
+  box-shadow: 0 12px 28px -18px rgba(0, 0, 0, 0.6);
+}
+
+.box:focus-visible {
+  outline: 2px solid var(--brand-1);
+  outline-offset: 3px;
+}
+
+/* 右上角的跳转小箭头，悬停时出现 */
+.box::after {
+  content: "↗";
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--press);
+  color: var(--brand-1);
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.box:hover::after,
+.box:focus-visible::after {
+  opacity: 1;
+  transform: none;
+}
+
+.box .title {
+  transition: color 0.2s ease;
+}
+
+.box:hover .title,
+.box:focus-visible .title {
+  color: var(--brand-1);
 }
 
 .box .icon {

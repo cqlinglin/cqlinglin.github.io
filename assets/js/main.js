@@ -28,15 +28,77 @@
     } catch (e) {}
   }
 
+  var veil = document.getElementById('themeVeil');
+  var switching = false;
+
   if (switches.length) {
     applyTheme(root.dataset.theme || 'dark');
+
+    // 从开关位置扩散的圆形遮罩：先盖住旧页面，再切换主题并淡出
+    function switchTheme(fromEl) {
+      if (switching) return;
+      var next = root.dataset.theme === 'light' ? 'dark' : 'light';
+
+      if (!veil || !fromEl || reduceMotion) {
+        applyTheme(next);
+        return;
+      }
+
+      switching = true;
+      var rect = fromEl.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var radius = Math.hypot(
+        Math.max(cx, window.innerWidth - cx),
+        Math.max(cy, window.innerHeight - cy)
+      );
+      var DUR = 520;
+      var FADE = 240;
+      var t0 = 0;
+
+      veil.hidden = false;
+      veil.style.background = next === 'light' ? '#ffffff' : '#0d1411';
+      veil.style.opacity = '1';
+      veil.style.clipPath = 'circle(0px at ' + cx + 'px ' + cy + 'px)';
+
+      function expand(now) {
+        if (!t0) t0 = now;
+        var p = Math.min(1, (now - t0) / DUR);
+        var eased = 1 - Math.pow(1 - p, 3);
+        veil.style.clipPath =
+          'circle(' + (radius * eased).toFixed(1) + 'px at ' + cx + 'px ' + cy + 'px)';
+        if (p < 1) {
+          requestAnimationFrame(expand);
+        } else {
+          applyTheme(next);
+          requestAnimationFrame(fade);
+        }
+      }
+
+      function fade(now) {
+        var f0 = now;
+        (function step(n) {
+          var p = Math.min(1, (n - f0) / FADE);
+          veil.style.opacity = String(1 - p);
+          if (p < 1) {
+            requestAnimationFrame(step);
+          } else {
+            veil.hidden = true;
+            veil.style.cssText = '';
+            switching = false;
+          }
+        })(now);
+      }
+
+      requestAnimationFrame(expand);
+    }
+
     switches.forEach(function (el) {
       el.addEventListener('click', function () {
-        applyTheme(root.dataset.theme === 'light' ? 'dark' : 'light');
+        switchTheme(el);
       });
     });
   }
-
   /* ---------- 2. 星空（内容后面） ---------- */
   var starCanvas = document.getElementById('fx');
   var starCtx = starCanvas && starCanvas.getContext ? starCanvas.getContext('2d') : null;
@@ -182,7 +244,7 @@
     var pieces = [];
     var cLast = 0;
     var cRaf = null;
-    var COLORS = ['#3dd68c', '#22d3ee', '#a3e635', '#f472b6', '#fbbf24', '#818cf8', '#f87171'];
+    var COLORS = ['#3dd68c', '#22d3ee', '#a3e635', '#f472b6', '#fbbf24', '#818cf8', '#f87171', '#f9fafb', '#fcd34d'];
 
     function resizeConfetti() {
       cw = window.innerWidth;
@@ -194,43 +256,49 @@
       confettiCtx.setTransform(cdpr, 0, 0, cdpr, 0, 0);
     }
 
-    function addPiece(x, y, opts) {
-      var angle = opts.angle;
-      var spread = opts.spread;
-      var speed = opts.speed;
+    function addPiece(x, y, angle, spread, speed, scale) {
       var a = angle + (Math.random() - 0.5) * spread;
-      var v = speed * (0.6 + Math.random() * 0.8);
+      var v = speed * (0.35 + Math.random() * 0.9);
+      var s = scale || 1;
       pieces.push({
         x: x,
         y: y,
         vx: Math.cos(a) * v,
         vy: Math.sin(a) * v,
-        w: 6 + Math.random() * 6,
-        h: 8 + Math.random() * 8,
-        rot: Math.random() * Math.PI,
-        vrot: (Math.random() - 0.5) * 0.3,
+        w: (5 + Math.random() * 7) * s,
+        h: (4 + Math.random() * 6) * s,
+        rot: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.36,
         color: COLORS[(Math.random() * COLORS.length) | 0],
         life: 0,
-        max: 1400 + Math.random() * 900,
-        round: Math.random() > 0.7
+        max: 2400 + Math.random() * 1800,
+        drag: 0.985 + Math.random() * 0.008,
+        round: Math.random() > 0.82
       });
     }
 
-    function burst(x, y, count) {
-      for (var i = 0; i < count; i++) {
-        addPiece(x, y, { angle: -Math.PI / 2, spread: Math.PI * 1.35, speed: 9 });
-      }
+    // 点击：从光标处向四周炸开
+    function burst(x, y) {
+      for (var i = 0; i < 58; i++) addPiece(x, y, -Math.PI / 2, Math.PI * 2, 15, 1);
+      for (var j = 0; j < 24; j++) addPiece(x, y, -Math.PI / 2, Math.PI * 2, 8, 0.6);
       startConfetti();
     }
 
+    // 打开页面：整屏撒一遍
     function celebrate() {
-      var n = 50;
-      for (var i = 0; i < n; i++) {
-        addPiece(Math.random() * cw, -20 - Math.random() * 120, {
-          angle: Math.PI / 2,
-          spread: 0.9,
-          speed: 2 + Math.random() * 4
-        });
+      var i;
+      for (i = 0; i < 110; i++) {
+        addPiece(Math.random() * cw, -20 - Math.random() * 180, Math.PI / 2, 1.3, 4, 1);
+      }
+      for (i = 0; i < 80; i++) {
+        addPiece(
+          cw * (0.28 + Math.random() * 0.44),
+          ch * (0.12 + Math.random() * 0.28),
+          -Math.PI / 2,
+          Math.PI * 2,
+          16,
+          0.9
+        );
       }
       startConfetti();
     }
@@ -248,9 +316,9 @@
           continue;
         }
         var k = Math.min(dt / 16.67, 2.2);
-        p.vy += 0.32 * k;
-        p.vx *= 0.995;
-        p.vy *= 0.995;
+        p.vy += 0.26 * k;
+        p.vx *= p.drag;
+        p.vy *= p.drag;
         p.x += p.vx * k;
         p.y += p.vy * k;
         p.rot += p.vrot * k;
@@ -294,16 +362,11 @@
     window.addEventListener('pointerdown', function (e) {
       if (e.button !== 0) return;
       if (e.target.closest && e.target.closest('input, textarea, select')) return;
-      burst(e.clientX, e.clientY, 26);
+      burst(e.clientX, e.clientY);
     }, { passive: true });
 
-    // 每次打开标签页先庆祝一下
-    try {
-      if (!sessionStorage.getItem('vyra-celebrated')) {
-        sessionStorage.setItem('vyra-celebrated', '1');
-        setTimeout(celebrate, 450);
-      }
-    } catch (err) {}
+    // 每次打开页面都先撒一遍
+    setTimeout(celebrate, 380);
   }
 
   /* ---------- 4. 导航状态 ---------- */

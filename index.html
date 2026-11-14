@@ -4,16 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VYRA · 个人主页</title>
-  <meta name="description" content="VYRA 的个人站点：星空背景、鼠标点击光效、特性卡片与明暗主题。纯静态，由 GitHub Pages 托管。">
-  <meta name="theme-color" content="#0a0f0d">
+  <meta name="description" content="VYRA 的个人站点：星空背景、点击彩纸、特性卡片与明暗主题。纯静态，由 GitHub Pages 托管。">
+  <meta name="theme-color" content="#0d1411">
   <meta property="og:title" content="VYRA · 个人主页">
   <meta property="og:description" content="属于你的数字自留地。">
   <meta property="og:type" content="website">
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/css/style.css">
   <script>
-    // 在首帧之前应用主题，避免刷新时闪白
-    // 默认深色；地址后面加 ?theme=light 可临时预览浅色（不写入本地存储）
+    // 首帧前定主题，避免刷新闪白；默认深色，?theme=light 可预览浅色
     (function () {
       try {
         var q = new URLSearchParams(location.search).get('theme');
@@ -31,217 +30,211 @@
 </head>
 
 <body id="top">
-  <!-- 星空（在内容后面） -->
+  <!-- 星空：在内容后面 -->
   <canvas id="fx" aria-hidden="true"></canvas>
-  <!-- 点击光效（在内容上面） -->
-  <canvas id="fx-top" aria-hidden="true"></canvas>
-  <!-- 跟随鼠标的柔光 -->
-  <div class="cursor-glow" aria-hidden="true"></div>
+  <!-- 彩纸：点击时在内容上面 -->
+  <canvas id="confetti" aria-hidden="true"></canvas>
 
   <!-- ==================== 顶部导航 ==================== -->
-  <header class="site-header" id="header">
-    <div class="wrap header-inner">
-      <a class="brand" href="#top" aria-label="VYRA 首页">
-        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+  <header class="nav" id="nav">
+    <div class="nav-bar">
+      <a class="nav-title" href="#top" aria-label="回到首页">
+        <svg class="nav-logo" viewBox="0 0 32 32" aria-hidden="true">
           <defs>
-            <linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">
+            <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#a3e635"></stop>
               <stop offset="1" stop-color="#22d3ee"></stop>
             </linearGradient>
           </defs>
-          <rect x="2" y="2" width="12" height="12" rx="3.5" fill="url(#bm)"></rect>
-          <rect x="18" y="2" width="12" height="12" rx="3.5" fill="currentColor" opacity=".28"></rect>
-          <rect x="2" y="18" width="12" height="12" rx="3.5" fill="currentColor" opacity=".28"></rect>
-          <rect x="18" y="18" width="12" height="12" rx="3.5" fill="url(#bm)" opacity=".55"></rect>
+          <rect x="2" y="2" width="12.5" height="12.5" rx="3" fill="url(#lg)"></rect>
+          <rect x="17.5" y="2" width="12.5" height="12.5" rx="3" fill="currentColor" opacity=".3"></rect>
+          <rect x="2" y="17.5" width="12.5" height="12.5" rx="3" fill="currentColor" opacity=".3"></rect>
+          <rect x="17.5" y="17.5" width="12.5" height="12.5" rx="3" fill="url(#lg)" opacity=".55"></rect>
         </svg>
-        <span class="brand-name">VYRA</span>
+        <span>VYRA</span>
       </a>
 
-      <!-- 搜索：点击打开浮层，Ctrl/⌘ + K 也可-->
-      <button class="search-trigger" type="button" id="searchTrigger" aria-haspopup="dialog">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-        <span>搜索内容…</span>
-        <kbd>Ctrl K</kbd>
+      <button class="nav-search" id="searchTrigger" type="button" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m19.5 19.5-4-4"></path></svg>
+        <span class="search-text">搜索</span>
+        <span class="search-keys"><kbd>Ctrl</kbd><kbd>K</kbd></span>
       </button>
 
-      <nav class="nav" id="nav" aria-label="主导航">
-        <a class="nav-link is-active" href="#top">首页</a>
-        <a class="nav-link" href="#features">特性</a>
-        <a class="nav-link" href="#start">开始</a>
-        <a class="nav-link" href="https://github.com/cqlinglin" target="_blank" rel="noopener">GitHub</a>
-      </nav>
+      <div class="nav-content">
+        <nav class="nav-menu" aria-label="主导航">
+          <a class="nav-link active" href="#top"><span>🏠 首页</span></a>
+          <a class="nav-link" href="#features"><span>🚀 快速开始</span></a>
+          <a class="nav-link external" href="https://github.com/cqlinglin" target="_blank" rel="noopener">
+            <span>🌐 官网</span>
+            <svg class="link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 16 8M9 8h7v7"></path></svg>
+          </a>
+        </nav>
 
-      <div class="header-tools">
-        <button class="icon-btn" id="themeToggle" type="button" aria-label="切换明暗主题" title="切换明暗主题">
-          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2"></circle>
-            <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path>
-          </svg>
-          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z"></path>
-          </svg>
-        </button>
-        <a class="icon-btn" href="https://github.com/cqlinglin/cqlinglin.github.io" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub 仓库">
+        <!-- 明暗开关：40×22 胶囊，滑块里带日/月图标 -->
+        <div class="nav-appearance">
+          <button class="switch" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="切换深浅模式" title="切换深浅模式">
+            <span class="check">
+              <span class="icon">
+                <svg class="sun" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4.2"></circle>
+                  <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"></path>
+                </svg>
+                <svg class="moon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20.4 14.6A8.6 8.6 0 0 1 9.4 3.6a8.6 8.6 0 1 0 11 11Z"></path>
+                </svg>
+              </span>
+            </span>
+          </button>
+        </div>
+
+        <a class="nav-social" href="https://github.com/cqlinglin/cqlinglin.github.io" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub 仓库">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4 1.2-4-2.2-5.5-2.7M15 21v-3.4c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.7 4.7 0 0 0-1.3-3.2 4.4 4.4 0 0 0-.1-3.3s-1.1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C6.9 2.8 5.8 3.1 5.8 3.1a4.4 4.4 0 0 0-.1 3.3A4.7 4.7 0 0 0 4.4 9.6c0 4.6 2.7 5.7 5.5 6-.5.5-.5 1-.5 1.9V21"></path></svg>
         </a>
-        <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="mobileMenu">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+
+        <div class="nav-extra">
+          <button class="extra-btn" id="extraBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="更多">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="19" cy="12" r="1.4"></circle></svg>
+          </button>
+          <div class="extra-menu" id="extraMenu" hidden>
+            <div class="extra-group">
+              <p class="extra-label">深浅模式</p>
+              <button class="switch" id="themeToggle2" type="button" role="switch" aria-checked="false" aria-label="切换深浅模式">
+                <span class="check">
+                  <span class="icon">
+                    <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"></path></svg>
+                    <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 14.6A8.6 8.6 0 0 1 9.4 3.6a8.6 8.6 0 1 0 11 11Z"></path></svg>
+                  </span>
+                </span>
+              </button>
+            </div>
+            <div class="extra-group">
+              <a class="extra-item" href="https://github.com/cqlinglin/cqlinglin.github.io" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4 1.2-4-2.2-5.5-2.7M15 21v-3.4c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.7 4.7 0 0 0-1.3-3.2 4.4 4.4 0 0 0-.1-3.3s-1.1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C6.9 2.8 5.8 3.1 5.8 3.1a4.4 4.4 0 0 0-.1 3.3A4.7 4.7 0 0 0 4.4 9.6c0 4.6 2.7 5.7 5.5 6-.5.5-.5 1-.5 1.9V21"></path></svg>
+                <span>GitHub 仓库</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <button class="hamburger" id="menuBtn" type="button" aria-label="菜单" aria-expanded="false" aria-controls="navScreen">
+          <span></span><span></span><span></span>
         </button>
       </div>
     </div>
 
-    <!-- 手机端下拉菜单 -->
-    <div class="mobile-menu" id="mobileMenu" hidden>
-      <a class="nav-link" href="#top">首页</a>
-      <a class="nav-link" href="#features">特性</a>
-      <a class="nav-link" href="#start">开始</a>
-      <a class="nav-link" href="https://github.com/cqlinglin" target="_blank" rel="noopener">GitHub</a>
+    <!-- 手机端下拉 -->
+    <div class="nav-screen" id="navScreen" hidden>
+      <a class="screen-link" href="#top">🏠 首页</a>
+      <a class="screen-link" href="#features">🚀 快速开始</a>
+      <a class="screen-link" href="https://github.com/cqlinglin" target="_blank" rel="noopener">🌐 官网</a>
+      <div class="screen-row">
+        <span>深浅模式</span>
+        <button class="switch" id="themeToggle3" type="button" role="switch" aria-checked="false" aria-label="切换深浅模式">
+          <span class="check">
+            <span class="icon">
+              <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"></path></svg>
+              <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 14.6A8.6 8.6 0 0 1 9.4 3.6a8.6 8.6 0 1 0 11 11Z"></path></svg>
+            </span>
+          </span>
+        </button>
+      </div>
     </div>
   </header>
 
   <main>
     <!-- ==================== 首屏 ==================== -->
-    <section class="hero wrap">
-      <div class="hero-copy">
-        <p class="eyebrow"><span class="dot"></span>个人主页 · 静态托管</p>
-
-        <h1 class="hero-title">
-          <span class="line">属于你的</span>
-          <span class="line grad">数字自留地</span>
-        </h1>
-
-        <p class="hero-sub">
-          一个安静、轻快、随手就能改的个人网站。星空会跟着鼠标移动，
-          每次点击都会留下一点光。
-        </p>
-
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#features">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 4l8 7.5"></path><path d="M6 10.5V20h12v-9.5"></path></svg>
-            开始探索
-          </a>
-          <a class="btn btn-ghost" href="#start">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
-            快速开始
-          </a>
+    <section class="hero">
+      <div class="hero-container">
+        <div class="hero-main">
+          <h1 class="heading">
+            <span class="name">VYRA</span>
+            <span class="text">个人<span class="mark">主页</span></span>
+          </h1>
+          <p class="tagline">安静、轻快，还带一点小惊喜 🎉</p>
+          <div class="actions">
+            <a class="btn brand" href="#features">🏠 首页</a>
+            <a class="btn alt" href="#features">🚀 快速开始</a>
+          </div>
         </div>
 
-        <ul class="hero-meta">
-          <li><strong>0</strong> 依赖</li>
-          <li><strong>&lt; 30 KB</strong> 体积</li>
-          <li><strong>2</strong> 套主题</li>
-        </ul>
-      </div>
-
-      <!-- 右侧装饰图形 -->
-      <div class="hero-art" aria-hidden="true">
-        <div class="halo"></div>
-        <div class="ring ring-a"></div>
-        <div class="ring ring-b"></div>
-        <div class="logo-grid">
-          <span></span><span></span><span></span><span></span>
+        <div class="hero-image" aria-hidden="true">
+          <div class="image-bg"></div>
+          <div class="logo-grid">
+            <span></span><span></span><span></span><span></span>
+          </div>
         </div>
-        <div class="art-shadow"></div>
       </div>
     </section>
 
-    <!-- ==================== 特性卡片 ==================== -->
-    <section class="features wrap" id="features">
-      <div class="section-head">
-        <h2>它有的，刚好够用</h2>
-        <p>没有多余的依赖，也没有多余的花样。</p>
-      </div>
-
-      <div class="card-grid">
-        <!-- 想改内容：直接改下面的 h3 与 p 即可；加一张卡就复制一整个 article -->
-        <article class="card" data-search="极简排版 留白 节奏">
-          <span class="card-icon" style="--tint:#a3e635">
-            <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"></path></svg>
-          </span>
-          <h3>极简排版</h3>
-          <p>以留白和节奏感为核心，读起来不累，看起来舒服。</p>
-        </article>
-
-        <article class="card" data-search="内容驱动 HTML 文字 修改">
-          <span class="card-icon" style="--tint:#f472b6">
-            <svg viewBox="0 0 24 24"><path d="M5 4h9l5 5v11H5z"></path><path d="M14 4v5h5"></path><path d="M8.5 13h7M8.5 16.5h4.5"></path></svg>
-          </span>
-          <h3>内容驱动</h3>
-          <p>所有文字都写在 HTML 里，改一行字就能更新一整页。</p>
-        </article>
-
-        <article class="card" data-search="秒开 性能 静态 快速">
-          <span class="card-icon" style="--tint:#38bdf8">
-            <svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z"></path></svg>
-          </span>
-          <h3>秒开体验</h3>
-          <p>零框架、零构建，静态资源直接输出，首屏几乎瞬间完成。</p>
-        </article>
-
-        <article class="card" data-search="适配 响应式 手机 平板">
-          <span class="card-icon" style="--tint:#818cf8">
-            <svg viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="13" height="10" rx="1.6"></rect><path d="M6 18.5h6"></path><rect x="17" y="9" width="4.5" height="10.5" rx="1.4"></rect></svg>
-          </span>
-          <h3>全端适配</h3>
-          <p>桌面、平板与手机共用一套布局，窄屏自动重排成单列。</p>
-        </article>
-
-        <article class="card" data-search="主题 明暗 深色 浅色">
-          <span class="card-icon" style="--tint:#2dd4bf">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17Z" fill="currentColor" stroke="none"></path></svg>
-          </span>
-          <h3>明暗双主题</h3>
-          <p>跟随系统偏好，也可以手动切换，并记住你的选择。</p>
-        </article>
-
-        <article class="card" data-search="交互 光效 点击 粒子 星空">
-          <span class="card-icon" style="--tint:#fbbf24">
-            <svg viewBox="0 0 24 24"><path d="M4 15.5c3.5-6 8-6 11.5 0"></path><circle cx="12" cy="6.5" r="3"></circle><path d="M12 17v4M8.5 19.5 12 21l3.5-1.5"></path></svg>
-          </span>
-          <h3>交互光效</h3>
-          <p>点击任意位置会炸开一圈光点，鼠标移动带出视差星空。</p>
-        </article>
-
-        <article class="card" data-search="扩展 模块 复制 组件">
-          <span class="card-icon" style="--tint:#c084fc">
-            <svg viewBox="0 0 24 24"><path d="M9 3h6v3.2H9zM3 9h3.2v6H3zM17.8 9H21v6h-3.2zM9 17.8h6V21H9z"></path><path d="M9 6h6M6 9v6M18 9v6M9 18h6" opacity=".5"></path></svg>
-          </span>
-          <h3>易于扩展</h3>
-          <p>卡片、图标和按钮都是独立模块，复制粘贴就能新增一块。</p>
-        </article>
-
-        <article class="card" data-search="安全 纯净 无跟踪 隐私">
-          <span class="card-icon" style="--tint:#60a5fa">
-            <svg viewBox="0 0 24 24"><path d="M12 3 5 5.8v5.6c0 4.3 2.9 7.6 7 9.6 4.1-2 7-5.3 7-9.6V5.8z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></svg>
-          </span>
-          <h3>纯净无扰</h3>
-          <p>没有统计脚本和第三方请求，你的访问只属于你自己。</p>
-        </article>
-      </div>
-    </section>
-
-    <!-- ==================== 开始 ==================== -->
-    <section class="start wrap" id="start">
-      <div class="start-inner">
-        <div>
-          <h2>现在就把它变成你的</h2>
-          <p>替换文案、换掉配色、加几张卡片，一个下午就能上线。</p>
-        </div>
-        <div class="start-actions">
-          <a class="btn btn-primary" href="https://github.com/cqlinglin/cqlinglin.github.io" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5"></path><path d="M4 17v3h16v-3"></path></svg>
-            查看仓库
-          </a>
-          <a class="btn btn-ghost" href="#top">回到顶部</a>
+    <!-- ==================== 特性 ==================== -->
+    <section class="features" id="features">
+      <div class="features-container">
+        <div class="items">
+          <!-- 想改内容：改 h2 与 p；加一张卡就复制整个 <div class="item"> -->
+          <div class="item">
+            <article class="box">
+              <div class="icon">⚙️</div>
+              <h2 class="title">极简排版</h2>
+              <p class="details">以留白和节奏感为核心，读起来不累，看起来舒服。</p>
+            </article>
+          </div>
+          <div class="item">
+            <article class="box">
+              <div class="icon">🧰</div>
+              <h2 class="title">内容驱动</h2>
+              <p class="details">所有文字都写在 HTML 里，改一行字就能更新一整页。</p>
+            </article>
+          </div>
+          <div class="item">
+            <article class="box">
+              <div class="icon">💾</div>
+              <h2 class="title">秒开体验</h2>
+              <p class="details">零框架、零构建，静态资源直接输出，首屏几乎瞬间完成。</p>
+            </article>
+          </div>
+          <div class="item">
+            <article class="box">
+              <div class="icon">🌐</div>
+              <h2 class="title">全端适配</h2>
+              <p class="details">桌面、平板与手机共用一套布局，窄屏自动重排成单列。</p>
+            </article>
+          </div>
+          <div class="item">
+            <article class="box">
+              <div class="icon">🎨</div>
+              <h2 class="title">明暗双主题</h2>
+              <p class="details">跟随系统偏好，也可以手动切换，并记住你的选择。</p>
+            </article>
+          </div>
+          <div class="item">
+            <article class="box">
+              <div class="icon">🧪</div>
+              <h2 class="title">交互光效</h2>
+              <p class="details">点击任意位置会撒出一把彩纸，鼠标移动带出淡淡视差。</p>
+            </article>
+          </div>
+          <div class="item">
+            <article class="box">
+              <div class="icon">📜</div>
+              <h2 class="title">易于扩展</h2>
+              <p class="details">卡片、图标和按钮都是独立模块，复制粘贴就能新增一块。</p>
+            </article>
+          </div>
+          <div class="item">
+            <article class="box">
+              <div class="icon">🛡️</div>
+              <h2 class="title">纯净无扰</h2>
+              <p class="details">没有统计脚本和第三方请求，你的访问只属于你自己。</p>
+            </article>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- ==================== 页脚 ==================== -->
-  <footer class="site-footer">
-    <div class="wrap footer-inner">
-      <p>© <span id="year">2026</span> VYRA · 静态托管于 GitHub Pages</p>
+  <footer class="footer">
+    <div class="footer-inner">
+      <p class="footer-text">© <span id="year">2026</span> VYRA · 由 GitHub Pages 托管</p>
       <p class="footer-links">
         <a href="#top">回到顶部</a>
         <a href="https://github.com/cqlinglin" target="_blank" rel="noopener">GitHub</a>

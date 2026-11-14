@@ -21,6 +21,11 @@
 
 ## 常见修改
 
+### 0. 不想装 Git？直接在网页上改
+
+打开 <https://github.com/cqlinglin/cqlinglin.github.io>，点开要改的文件 →
+右上角铅笔图标 → 改完点「Commit changes」。提交后 1–2 分钟，线上就会更新。
+
 ### 1. 改名字和标题
 
 - 名字：`index.html` 里所有 `VYRA` 换成你的名字（导航栏、`<title>`、页脚）。
@@ -90,8 +95,14 @@ git push
 
 推上去后等 1–2 分钟，Pages 会自动重新构建。
 
+### 想换成自己的域名
+
+在域名服务商处购买域名后，在仓库根目录新建一个名为 `CNAME` 的文件，内容只写域名
+（例如 `www.example.com`），再到仓库 Settings → Pages 里填上同一个域名并开启 HTTPS。
+
 ## 说明
 
 - 页面不加载任何外部字体、图标库或统计脚本，离线也能正常显示。
 - 图标全部是内联 SVG，可以直接改 `d` 路径或换成自己的图标。
-- 主题选择保存在浏览器 `localStorage` 的 `vyra-theme` 键里。
+- 主题选择保存在浏览器 `localStorage` 的 `vyra-theme` 键里；默认深色，
+  在网址后加 `?theme=light` 可以临时预览浅色（不会写入存储）。

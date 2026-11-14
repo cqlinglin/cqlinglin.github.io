@@ -868,7 +868,20 @@ svg {
   background: var(--press);
   font-size: 24px;
   line-height: 1;
+  flex-shrink: 0;
+  overflow: hidden;
 }
+
+/* 图标文件 / 内联 SVG 和 emoji 共用这个 48px 的底板 */
+.box .icon img,
+.box .icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  object-fit: contain;
+}
+
+/* 内联 SVG 想跟随文字颜色时，在 SVG 上写 fill="currentColor" 或 stroke="currentColor" */
 
 .box .title {
   font-size: 16px;
